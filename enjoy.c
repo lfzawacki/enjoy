@@ -17,7 +17,7 @@ int lua_send_key_down_event( lua_State* L )
 {
 	if ( lua_isstring(L,-1) ) {
 		const char* code = lua_tostring(L,-1);
-		send_key_down_event(code[0]);
+		send_key_down_event(38);
 	} else {
 		luaL_error(L,"Dammit! Gimme a keycode...");
 	}
@@ -29,7 +29,7 @@ int lua_send_key_up_event( lua_State* L )
 {
 	if ( lua_isstring(L,-1) ) {
 		const char* code = lua_tostring(L,-1);
-		send_key_up_event(code[0]);
+		send_key_up_event(38);
 	} else {
 		luaL_error(L,"Dammit! Gimme a keycode...");
 	}
@@ -43,7 +43,7 @@ void dump_event(struct js_event e) {
 
 	printf("----\n");
 	printf("time: %d\n", e.time);
-	printf("value: %s\n", e.value == 1 ? "Down" : "Up" );
+	printf("value: %s\n", e.value == 1 ? "DOWN" : "UP" );
 	printf("type: %d\n", e.type);
 	printf("number: %d\n", e.number);
 
@@ -79,8 +79,8 @@ int main() {
 	lua_State *L = openLua();
 	loadLuaFile(L,"core.lua");
 
-	lua_register(L, "__send_key__down_event" , lua_send_key_down_event );
-	lua_register(L, "__send_key__up_event" , lua_send_key_up_event );
+	lua_register(L, "__send_key_down_event" , lua_send_key_down_event );
+	lua_register(L, "__send_key_up_event" , lua_send_key_up_event );
 
 	while(1) {
 		len = read(fd, &msg, sizeof(msg));

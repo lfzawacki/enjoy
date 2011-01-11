@@ -1,4 +1,4 @@
 button '9'
 	explain 'Reload file'
-	reset 'self'
+	load 'self'
 

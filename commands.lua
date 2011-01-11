@@ -1,6 +1,6 @@
 button '1'
 	explain 'Next commands'
-	reset 'mycom.lua'
+	key '1'
 
 button '2'
 	explain 'Previous commands'
@@ -9,7 +9,6 @@ button '2'
 button '4'
 	explain 'Ataque das Corujas'
 	exec 'aplay todo &'
-	key '1'
 
 button '3'
 	explain 'Play akinator'
@@ -17,5 +16,5 @@ button '3'
 
 button '9'
 	explain 'Reload file'
-	reset 'self'
+	load 'self'
 

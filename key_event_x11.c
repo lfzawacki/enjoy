@@ -21,7 +21,7 @@ Display* x11_get_display() {
 
 }
 
-void send_key_down_event( char keycode )
+void send_key_down_event( int keycode )
 {
 	Display* d = x11_get_display();
 	// (display , keycode , is_pressed , delay )
@@ -29,7 +29,7 @@ void send_key_down_event( char keycode )
 	XFlush(d);
 }
 
-void send_key_up_event( char keycode )
+void send_key_up_event( int keycode )
 {
 	Display* d = x11_get_display();
 	// (display , keycode , is_pressed , delay )
