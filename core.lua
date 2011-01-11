@@ -28,6 +28,10 @@ function exec(cmd)
 	table.insert(commands.current, { cmd , function () os.execute(cmd) end } )
 end
 
+function key(k)
+	table.insert(commands.current , { 'k', function () __send_key_event(k) end } )
+end
+
 function explain(str)
 	commands.current.explain = str
 end

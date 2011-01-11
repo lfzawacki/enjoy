@@ -1,12 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+// this should be modularized for other OS
 #include <fcntl.h>
 #include <linux/joystick.h>
-#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
+
+////// keypresses module starts
+#include "key_event.h"
+
+int lua_send_key_event( lua_State* L )
+{
+	if ( lua_isstring(L,-1) ) {
+		const char* code = lua_tostring(L,-1);
+		send_key_event(code[0]);
+	} else {
+		luaL_error(L,"Dammit! Gimme a keycode...");
+	}
+
+	return 0;
+}
+
+////// and ends here ...
 
 void dump_event(struct js_event e) {
 
@@ -25,12 +44,6 @@ int openDevice(const char* device) {
 lua_State* openLua() {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
-/*	luaopen_base(L);*/
-/*	luaopen_table(L);*/
-/*	luaopen_string(L);*/
-/*	luaopen_math(L);*/
-/*	luaopen_os(L);*/
-
 	return L;
 }
 
@@ -53,6 +66,8 @@ int main() {
 	int fd = openDevice("/dev/input/js0");
 	lua_State *L = openLua();
 	loadLuaFile(L,"core.lua");
+
+	lua_register(L, "__send_key_event" , lua_send_key_event );
 
 	while(1) {
 		len = read(fd, &msg, sizeof(msg));

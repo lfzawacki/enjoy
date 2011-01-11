@@ -9,6 +9,11 @@ button '2'
 button '4'
 	explain 'Ataque das Corujas'
 	exec 'aplay todo &'
+	key '1'
+
+button '3'
+	explain 'Play akinator'
+	exec 'firefox www.akinator.com'
 
 button '9'
 	explain 'Reload file'
