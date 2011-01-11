@@ -13,11 +13,23 @@
 ////// keypresses module starts
 #include "key_event.h"
 
-int lua_send_key_event( lua_State* L )
+int lua_send_key_down_event( lua_State* L )
 {
 	if ( lua_isstring(L,-1) ) {
 		const char* code = lua_tostring(L,-1);
-		send_key_event(code[0]);
+		send_key_down_event(code[0]);
+	} else {
+		luaL_error(L,"Dammit! Gimme a keycode...");
+	}
+
+	return 0;
+}
+
+int lua_send_key_up_event( lua_State* L )
+{
+	if ( lua_isstring(L,-1) ) {
+		const char* code = lua_tostring(L,-1);
+		send_key_up_event(code[0]);
 	} else {
 		luaL_error(L,"Dammit! Gimme a keycode...");
 	}
@@ -31,7 +43,7 @@ void dump_event(struct js_event e) {
 
 	printf("----\n");
 	printf("time: %d\n", e.time);
-	printf("value: %x\n", e.value);
+	printf("value: %s\n", e.value == 1 ? "Down" : "Up" );
 	printf("type: %d\n", e.type);
 	printf("number: %d\n", e.number);
 
@@ -67,17 +79,23 @@ int main() {
 	lua_State *L = openLua();
 	loadLuaFile(L,"core.lua");
 
-	lua_register(L, "__send_key_event" , lua_send_key_event );
+	lua_register(L, "__send_key__down_event" , lua_send_key_down_event );
+	lua_register(L, "__send_key__up_event" , lua_send_key_up_event );
 
 	while(1) {
 		len = read(fd, &msg, sizeof(msg));
 
 		if (len == sizeof(msg)) { //read was succesfull
 
-			if (msg.type == JS_EVENT_BUTTON && msg.value == 1) { // seems to be a key press
+			if (msg.type == JS_EVENT_BUTTON) { // seems to be a key press
 				dump_event(msg);
 
-				lua_getglobal(L,"event");
+				if ( msg.value == 1 ) { //button down
+					lua_getglobal(L,"event_button_down");
+				} else {
+					lua_getglobal(L,"event_button_up");
+				}
+
 				lua_pushnumber(L, (double) msg.number );
 
 				if(lua_pcall(L, 1, 0, 0) != 0) {

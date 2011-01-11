@@ -21,11 +21,19 @@ Display* x11_get_display() {
 
 }
 
-void send_key_event( char keycode )
+void send_key_down_event( char keycode )
 {
 	Display* d = x11_get_display();
 	// (display , keycode , is_pressed , delay )
 	XTestFakeKeyEvent(d, keycode , 1 , 0);
+	XFlush(d);
+}
+
+void send_key_up_event( char keycode )
+{
+	Display* d = x11_get_display();
+	// (display , keycode , is_pressed , delay )
+	XTestFakeKeyEvent(d, keycode , 0 , 0);
 	XFlush(d);
 }
 

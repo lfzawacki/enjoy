@@ -3,19 +3,45 @@
 
 local function new_command_table()
 
-	-- batch_exec will execute in sequence all the commands asked
-	local function batch_exec(t,button)
-		for _,cmd in ipairs(t[button]) do
-			print(cmd[1])
-			cmd[2]()
+	utilities = {
+		-- inserts in the current button
+		insert = function (self, cmd_table)
+			assert(self.current , 'Set a current button first!')
+			table.insert(self.current, cmd_table)
 		end
-	end
+	}
 
-	return setmetatable({}, { __call = batch_exec } )
+	meta = {
+		-- batch_exec will execute in sequence all the commands for button
+		-- state is either down or up (press or release)
+		__call = function (t,button,state)
+			for _,cmd in ipairs(t[button]) do
+				cmd[state]()
+			end
+		end ,
+
+		__index = utilities
+	}
+
+	return setmetatable( { current = nil } , meta )
 end
 
 current_file = 'commands.lua'
 commands = new_command_table()
+
+local function do_event(x,state)
+	x = tostring(x)
+	if commands[x] ~= nil  then
+		commands(x,state)
+	else
+		-- dont crash
+		print('poof')
+	end
+
+end
+
+function event_button_down(x) do_event(x,'down') end
+function event_button_up(x) do_event(x,'up') end
 
 -- the 'API' are the button and exec functions
 
@@ -25,11 +51,14 @@ function button(b)
 end
 
 function exec(cmd)
-	table.insert(commands.current, { cmd , function () os.execute(cmd) end } )
+	commands:insert { down = function () os.execute(cmd) end }
 end
 
 function key(k)
-	table.insert(commands.current , { 'k', function () __send_key_event(k) end } )
+	commands:insert {
+		down = function () __send_key_down_event(k) end ,
+		up = function() __send_key_up_event(k) end
+	}
 end
 
 function explain(str)
@@ -83,17 +112,6 @@ function report(commands)
 	end
 
 	notify_real(note)
-end
-
-
-function event(x)
-	x = tostring(x)
-	if commands[x] ~= nil  then
-		commands(x)
-	else
-		-- dont crash
-		print('poof')
-	end
 end
 
 
