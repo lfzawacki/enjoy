@@ -16,8 +16,7 @@
 int lua_send_key_down_event( lua_State* L )
 {
 	if ( lua_isstring(L,-1) ) {
-		const char* code = lua_tostring(L,-1);
-		send_key_down_event(38);
+		send_key_down_event(lua_tostring(L,-1));
 	} else {
 		luaL_error(L,"Dammit! Gimme a keycode...");
 	}
@@ -28,8 +27,7 @@ int lua_send_key_down_event( lua_State* L )
 int lua_send_key_up_event( lua_State* L )
 {
 	if ( lua_isstring(L,-1) ) {
-		const char* code = lua_tostring(L,-1);
-		send_key_up_event(38);
+		send_key_up_event(lua_tostring(L,-1));
 	} else {
 		luaL_error(L,"Dammit! Gimme a keycode...");
 	}
@@ -110,4 +108,3 @@ int main() {
 	return 0;
 
 }
-
