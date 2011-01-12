@@ -71,14 +71,34 @@ end
 function key(k)
 	commands:insert {
 		down = function ()
-			     print(k .. ' down')
-				 __send_key_down_event(k)
-			   end ,
+			print(k .. ' down')
+			__send_key_down_event(k)
+		end ,
 		up = function()
-				print(k .. ' up')
-				__send_key_up_event(k)
+			print(k .. ' up')
+			__send_key_up_event(k)
 		end
 	}
+end
+
+
+function toggle(cmd_table)
+
+	-- assert for errors
+	local on = true
+
+	commands:insert {
+		down = function ()
+			if on then
+				os.execute(cmd_table.on)
+				on = false
+			else
+				os.execute(cmd_table.off)
+				on = true
+			end
+		end
+	}
+
 end
 
 function load(filename,nodoc)
@@ -128,7 +148,7 @@ function report(commands)
 
 	for i,cmd in pairs(commands) do
 		if i ~= 'current' then
-			note.message = note.message .. i .. ': ' .. cmd.explain .. '\n'
+			note.message = note.message .. i .. ': ' .. (cmd.explain or 'Nothing') .. '\n'
 		end
 	end
 
