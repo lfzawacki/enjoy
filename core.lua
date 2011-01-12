@@ -50,6 +50,7 @@ local function do_event(x,state)
 
 end
 
+-- these two are called from C
 function event_button_down(x) do_event(x,'down') end
 function event_button_up(x) do_event(x,'up') end
 
@@ -62,25 +63,23 @@ function button(b)
 	commands.current = commands[b]
 end
 
--- cmd is polymorphic and stuff
-function cmd(param)
-
-	local to_insert = nil
+local function construct_cmd(param)
+	ret = nil
 	if type(param) == 'table' then
 		-- already ready and formated like a
 		-- table with button (down|up) functions, we hope
-		to_insert = param
+		ret = param
 
 	elseif type(param) == 'function' then
 		-- a function to be performed,
 		-- just need to make a button down table
-		to_insert = {
+		ret = {
 			down = param
 		}
 	elseif type(param) == 'string' then
 		-- a string is an os command,
 		-- we encapsulate it in a function
-		to_insert = {
+		ret = {
 			down = function ()
 				print(param)
 				os.execute(param)
@@ -88,7 +87,17 @@ function cmd(param)
 		}
 	end
 
-	commands:insert(to_insert)
+	return ret
+end
+
+local function execute_cmd(param)
+	-- TODO this is confusing
+	construct_cmd(param)['down']()
+end
+
+-- cmd is polymorphic and stuff
+function cmd(param)
+	commands:insert( construct_cmd(param) )
 end
 
 function key(k)
@@ -113,10 +122,10 @@ function toggle(cmd_table)
 
 	cmd( function ()
 			if on then
-				os.execute(cmd_table.on)
+				execute_cmd(cmd_table.on)
 				on = false
 			else
-				os.execute(cmd_table.off)
+				execute_cmd(cmd_table.off)
 				on = true
 			end
 		end
@@ -138,7 +147,6 @@ function load(filename,nodoc)
 	)
 
 end
-
 
 function explain(str)
 	commands.current.explain = str

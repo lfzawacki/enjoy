@@ -6,13 +6,14 @@ button '2'
 
 button '3'
 	explain 'Play akinator'
+	toggle { on = function () print('foo') end , off = function () print('bar') end }
 	--cmd 'firefox www.akinator.com'
 
 button '4'
 	explain 'Ataque das Corujas'
 	cmd 'aplay todo &'
 
-button '8'
+button '4'
 	explain 'Test toggle'
 	toggle { on = 'ls' , off = 'ls -al' }
 
