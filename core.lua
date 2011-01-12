@@ -53,23 +53,46 @@ end
 function event_button_down(x) do_event(x,'down') end
 function event_button_up(x) do_event(x,'up') end
 
--- the 'API' are the button and exec functions
+-- TODO: document the API
 
 function button(b)
+	-- creates the command table for this button
+	-- and sets as the current one
 	commands[b] = { }
 	commands.current = commands[b]
 end
 
-function exec(cmd)
-	commands:insert { down = function ()
-			print('exec ' .. cmd)
-			os.execute(cmd)
-		end
-	}
+-- cmd is polymorphic and stuff
+function cmd(param)
+
+	local to_insert = nil
+	if type(param) == 'table' then
+		-- already ready and formated like a
+		-- table with button (down|up) functions, we hope
+		to_insert = param
+
+	elseif type(param) == 'function' then
+		-- a function to be performed,
+		-- just need to make a button down table
+		to_insert = {
+			down = param
+		}
+	elseif type(param) == 'string' then
+		-- a string is an os command,
+		-- we encapsulate it in a function
+		to_insert = {
+			down = function ()
+				print(param)
+				os.execute(param)
+			end
+		}
+	end
+
+	commands:insert(to_insert)
 end
 
 function key(k)
-	commands:insert {
+	cmd {
 		down = function ()
 			print(k .. ' down')
 			__send_key_down_event(k)
@@ -81,14 +104,14 @@ function key(k)
 	}
 end
 
-
 function toggle(cmd_table)
 
-	-- assert for errors
+	-- TODO assert for errors
+
+	-- closures rock
 	local on = true
 
-	commands:insert {
-		down = function ()
+	cmd( function ()
 			if on then
 				os.execute(cmd_table.on)
 				on = false
@@ -97,15 +120,13 @@ function toggle(cmd_table)
 				on = true
 			end
 		end
-	}
+	)
 
 end
 
 function load(filename,nodoc)
 
-	commands:insert {
-
-		down = function ()
+	cmd ( function ()
 			commands = new_command_table()
 
 			if filename ~= 'self' then current_file = filename end
@@ -114,8 +135,7 @@ function load(filename,nodoc)
 
 			report(commands)
 		end
-	}
-
+	)
 
 end
 
@@ -140,7 +160,7 @@ local function notify_real(t)
 end
 
 function notify(t)
-	exec( notify_impl(t) )
+	cmd( notify_impl(t) )
 end
 
 function report(commands)
