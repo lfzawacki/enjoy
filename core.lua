@@ -48,9 +48,10 @@ local function do_event(x,state)
 
 end
 
--- these two are called from C
-function event_button_down(x) do_event(x,'down') end
-function event_button_up(x) do_event(x,'up') end
+-- called from C
+function __event_button(x,down)
+	do_event(x, down and 'down' or 'up')
+end
 
 -- TODO: document the API
 

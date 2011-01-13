@@ -74,17 +74,13 @@ int main() {
 		if (len == sizeof(msg)) { //read was succesfull
 
 			if (msg.type == JS_EVENT_BUTTON) { // seems to be a key press
-				//dump_event(msg);
+				dump_event(msg);
 
-				if ( msg.value == 1 ) { //button down
-					lua_getglobal(L,"event_button_down");
-				} else {
-					lua_getglobal(L,"event_button_up");
-				}
-
+				lua_getglobal(L,"__event_button");
 				lua_pushnumber(L, (double) msg.number );
+				lua_pushboolean(L, (int) msg.value );
 
-				if(lua_pcall(L, 1, 0, 0) != 0) {
+				if(lua_pcall(L, 2, 0, 0) != 0) {
 					return luaL_error(L,"%s\n",lua_tostring(L, -1));
 				}
 
