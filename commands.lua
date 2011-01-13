@@ -1,10 +1,10 @@
 button '1'
 	explain 'Next commands'
-	key 'backspace'
+	key 'BackSpace'
 
 button '2'
 	explain 'Previous commands'
-	key 'A'
+	key 'a'
 
 button '3'
 	explain 'Play akinator'
@@ -16,10 +16,12 @@ button '4'
 	explain 'Ataque das Corujas'
 	cmd 'aplay todo &'
 
-button '4'
+button '8'
 	explain 'Test toggle'
-	toggle { on = 'ls' , off = 'ls -al' }
+	notify { message = 'Compiled this shit' }
+	toggle { on = 'make' , off = 'make love' }
 
 button '9'
 	explain 'Reload file'
 	load 'self'
+

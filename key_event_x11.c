@@ -23,50 +23,20 @@ Display* x11_get_display() {
 
 }
 
-// modifies the string in place and returns it
-char* toupperall( const char* str )
-{
-	int len = strlen(str);
-	int i;
-	char *tmp = strdup(str);
-
-	for( i=0 ; i < len ; i++ ) tmp[i] = toupper(tmp[i]) ;
-
-	return tmp;
-}
-
-void send_key_down_event( const char* keycode )
+void send_key_event( const char* keycode , int keydown )
 {
 	Display* d = x11_get_display();
 
-	char* upper = toupperall(keycode);
-	int code = XStringToKeysym(upper);
-	free(upper);
+	int code = XStringToKeysym(keycode);
 
 	if ( code == NoSymbol ) {
+		printf("No symbol");
 		return;
 	}
 
-	printf("CODE: %x\n",code);
+	printf("CODE: %x\nLULZ: %s\n",code, XKeysymToString(XKeycodeToKeysym(d,code,0)));
 	// (display , keycode , is_pressed , delay )
-	XTestFakeKeyEvent(d, code , 1 , 0);
+	XTestFakeKeyEvent(d, code , keydown , 0);
 	XFlush(d);
 }
 
-void send_key_up_event( const char* keycode )
-{
-	Display* d = x11_get_display();
-
-	char* upper = toupperall(keycode);
-	int code = XStringToKeysym(upper);
-	free(upper);
-
-	if ( code == NoSymbol ) {
-		return;
-	}
-
-	printf("CODE: %x\n",code);
-	// (display , keycode , is_pressed , delay )
-	XTestFakeKeyEvent(d, code , 0 , 0);
-	XFlush(d);
-}

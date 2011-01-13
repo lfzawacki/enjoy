@@ -41,11 +41,9 @@ commands = new_command_table()
 local function do_event(x,state)
 	x = tostring(x)
 	if commands[x] ~= nil  then
-		print('not poof')
 		commands(x,state)
 	else
 		-- dont crash
-		print('poof')
 	end
 
 end
@@ -104,11 +102,11 @@ function key(k)
 	cmd {
 		down = function ()
 			print(k .. ' down')
-			__send_key_down_event(k)
+			__send_key_event(k,true)
 		end ,
 		up = function()
 			print(k .. ' up')
-			__send_key_up_event(k)
+			__send_key_event(k,false)
 		end
 	}
 end

@@ -13,21 +13,10 @@
 ////// keypresses module starts
 #include "key_event.h"
 
-int lua_send_key_down_event( lua_State* L )
+int lua_send_key_event( lua_State* L )
 {
-	if ( lua_isstring(L,-1) ) {
-		send_key_down_event(lua_tostring(L,-1));
-	} else {
-		luaL_error(L,"Dammit! Gimme a keycode...");
-	}
-
-	return 0;
-}
-
-int lua_send_key_up_event( lua_State* L )
-{
-	if ( lua_isstring(L,-1) ) {
-		send_key_up_event(lua_tostring(L,-1));
+	if ( lua_isstring(L,1) && lua_isboolean(L,2) ) {
+		send_key_event(lua_tostring(L,1) , lua_toboolean(L,2) );
 	} else {
 		luaL_error(L,"Dammit! Gimme a keycode...");
 	}
@@ -77,8 +66,7 @@ int main() {
 	lua_State *L = openLua();
 	loadLuaFile(L,"core.lua");
 
-	lua_register(L, "__send_key_down_event" , lua_send_key_down_event );
-	lua_register(L, "__send_key_up_event" , lua_send_key_up_event );
+	lua_register(L, "__send_key_event" , lua_send_key_event );
 
 	while(1) {
 		len = read(fd, &msg, sizeof(msg));
@@ -86,7 +74,7 @@ int main() {
 		if (len == sizeof(msg)) { //read was succesfull
 
 			if (msg.type == JS_EVENT_BUTTON) { // seems to be a key press
-				dump_event(msg);
+				//dump_event(msg);
 
 				if ( msg.value == 1 ) { //button down
 					lua_getglobal(L,"event_button_down");
@@ -108,3 +96,4 @@ int main() {
 	return 0;
 
 }
+
