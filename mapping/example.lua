@@ -1,16 +1,13 @@
 button '1'
-	explain 'Next commands'
-	key 'BackSpace'
+	explain 'Go to menu'
+	load 'menu.lua'
 
 button '2'
-	explain 'Previous commands'
-	key 'a'
+	explain 'Go to exaile controls'
+	load 'exaile.lua'
 
 button '3'
-	explain 'Play akinator'
-	toggle { on = function () print('foo') end , off = function () print('bar') end }
-	key 'Return'
-	--cmd 'firefox www.akinator.com'
+	cmd 'firefox www.lua.org'
 
 button '4'
 	explain 'Ataque das Corujas'

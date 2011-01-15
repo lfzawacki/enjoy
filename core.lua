@@ -35,7 +35,8 @@ local function new_command_table()
 	return setmetatable( { current = nil } , meta )
 end
 
-current_file = 'commands.lua'
+base_dir = 'mapping/'
+current_file = base_dir .. 'example.lua'
 commands = new_command_table()
 
 local function do_event(x,state)
@@ -137,7 +138,7 @@ function load(filename,nodoc)
 	cmd ( function ()
 			commands = new_command_table()
 
-			if filename ~= 'self' then current_file = filename end
+			if filename ~= 'self' then current_file = base_dir .. filename end
 			dofile(current_file)
 			print('Loaded ' .. current_file)
 
