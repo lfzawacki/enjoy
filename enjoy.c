@@ -10,7 +10,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 
-////// keypresses module starts
+#if 0
 #include "key_event.h"
 
 int lua_send_key_event( lua_State* L )
@@ -24,7 +24,7 @@ int lua_send_key_event( lua_State* L )
 	return 0;
 }
 
-////// and ends here ...
+#endif
 
 void dump_event(struct js_event e) {
 
@@ -66,7 +66,7 @@ int main() {
 	lua_State *L = openLua();
 	loadLuaFile(L,"core.lua");
 
-	lua_register(L, "__send_key_event" , lua_send_key_event );
+	// lua_register(L, "__send_key_event" , lua_send_key_event );
 
 	while(1) {
 		len = read(fd, &msg, sizeof(msg));

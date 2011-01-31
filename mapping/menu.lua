@@ -4,10 +4,12 @@ button '2'
 	cmd 'firefox'
 
 button '3'
-
+	explain 'Control Audacity'
+	load 'audacity.lua'
 
 button '0'
-
+	explain 'Hydrogen Drums'
+	load 'hydrogen.lua'
 
 button '4'
 	explain 'Play Drums!'

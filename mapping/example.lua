@@ -7,16 +7,21 @@ button '2'
 	load 'exaile.lua'
 
 button '3'
+	explain 'Open Firefox'
 	cmd 'firefox www.lua.org'
 
 button '4'
-	explain 'Ataque das Corujas'
-	cmd 'aplay todo &'
+	explain 'Play a soundfile'
+	cmd 'aplay -N ryu.wav'
+
+button '0'
+	explain 'Testing toggle'
+	toggle { on = 'ls' , off = 'ls -al' }
 
 button '8'
-	explain 'Test toggle'
-	notify { message = 'Compiled this shit' }
-	toggle { on = 'make' , off = 'make love' }
+	explain 'Compile it ;)'
+	notify { message = 'Compiled it!' }
+	cmd 'make'
 
 button '9'
 	explain 'Reload file'
