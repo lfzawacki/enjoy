@@ -1,5 +1,4 @@
 
--- this assumes you have hydrogen drumbeat installed
 local function drum(wav)
 	local map = {
 		snare = 'c',
@@ -10,7 +9,7 @@ local function drum(wav)
 		crash = '2'
 	}
 
-	cmd('xdotool key ' .. map[wav])
+	key(map[wav])
 
 end
 

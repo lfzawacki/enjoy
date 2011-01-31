@@ -3,16 +3,17 @@
 
 local function new_command_table()
 
-	utilities = {
-		-- inserts in the current button
+	local utilities = {
+		-- inserts a command in the current button
 		insert = function (self, cmd_table)
 
 			-- check for errors
 			assert(self.current , 'Set a current button first!')
+
 			--local button_name = 'Button ' .. self.current.name .. ': '
 			assert( cmd_table.down or cmd_table.up , 'Set at least one command (down/up)!')
 
-			-- kind of setups null objects if methods are absent
+			-- setups null objects (empty functions) if methods are absent
 			if not cmd_table.down then cmd_table.down = function () end end
 			if not cmd_table.up then cmd_table.up = function () end end
 
@@ -20,9 +21,9 @@ local function new_command_table()
 		end
 	}
 
-	meta = {
-		-- batch_exec will execute in sequence all the commands for button
-		-- state is either down or up (press or release)
+	local meta = {
+		-- the call metamethod will execute in sequence all the commands for a button
+		-- state is either down or up (indicating a press or release repectively)
 		__call = function (t,button,state)
 			for _,cmd in ipairs(t[button]) do
 				cmd[state]()
@@ -32,9 +33,13 @@ local function new_command_table()
 		__index = utilities
 	}
 
-	return setmetatable( { current = nil } , meta )
+	-- a new command table with no current button
+	local cmd_table = { current = nil }
+
+	return setmetatable(  cmd_table , meta )
 end
 
+-- TODO should be moved to some kind of config file
 base_dir = 'mapping/'
 current_file = base_dir .. 'example.lua'
 commands = new_command_table()
@@ -50,6 +55,7 @@ local function do_event(x,state)
 end
 
 -- called from C
+-- receives joystick events and performs actions
 function __event_button(x,down)
 	do_event(x, down and 'down' or 'up')
 end
@@ -63,15 +69,18 @@ function button(b)
 	commands.current = commands[b]
 end
 
+-- cmd is polymorphic and stuff
+-- it can receive strings, tables and functions
 local function construct_cmd(param)
-	ret = nil
+	local ret = nil
+
 	if type(param) == 'table' then
 		-- already ready and formated like a
 		-- table with button (down|up) functions, we hope
 		ret = param
 
 	elseif type(param) == 'function' then
-		-- a function to be performed,
+		-- a function to be executed,
 		-- just need to make a button down table
 		ret = {
 			down = param
@@ -91,24 +100,28 @@ local function construct_cmd(param)
 end
 
 local function execute_cmd(param)
-	-- TODO this is confusing
 	construct_cmd(param)['down']()
 end
 
--- cmd is polymorphic and stuff
 function cmd(param)
 	commands:insert( construct_cmd(param) )
 end
 
+-- TODO
+-- for now this uses xdotool to send the commands
+-- in the future I want to have a portable module
+-- that sends the keypresses
 function key(k)
 	cmd {
 		down = function ()
 			print(k .. ' down')
-			__send_key_event(k,true)
+			execute_cmd('xdotool keydown ' .. k)
+			--__send_key_event(k,true)
 		end ,
 		up = function()
 			print(k .. ' up')
-			__send_key_event(k,false)
+			execute_cmd('xdotool keyup ' .. k)
+			--__send_key_event(k,false)
 		end
 	}
 end
@@ -133,6 +146,9 @@ function toggle(cmd_table)
 
 end
 
+-- loads the commands stored in a file and displays a visual confirmation
+-- the nodoc param should tell it not to display
+-- the visual, but for now it does nothing
 function load(filename,nodoc)
 
 	cmd ( function ()
@@ -152,6 +168,9 @@ function explain(str)
 	commands.current.explain = str
 end
 
+-- TODO modularize this to work everywhere
+-- quick and dirty visual notification
+-- works only where libnotify-bin package is available (ubuntu...)
 local function notify_impl(t)
 
 	t.icon = t.icon or "`pwd`/awesome.png"
@@ -171,8 +190,10 @@ function notify(t)
 	cmd( notify_impl(t) )
 end
 
+-- crafts a notification message with the contents of a file
+-- and displays it
 function report(commands)
-	note = { title = current_file, message = '', timeout = 2000 }
+	local note = { title = current_file, message = '', timeout = 2000 }
 
 	for i,cmd in pairs(commands) do
 		if i ~= 'current' then

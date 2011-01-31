@@ -55,15 +55,17 @@ void loadLuaFile(lua_State* L, const char* filename)
 		lua_error(L);
 	}
 
-	//lua_pcall(L, 0, 0, 0);
 }
 
 int main() {
 	unsigned int len = 0;
 	struct js_event msg;
 
+	// TODO have a config file for joysticks
 	int fd = openDevice("/dev/input/js0");
 	lua_State *L = openLua();
+
+	// TODO have core.lua as a precompiled binary
 	loadLuaFile(L,"core.lua");
 
 	// lua_register(L, "__send_key_event" , lua_send_key_event );

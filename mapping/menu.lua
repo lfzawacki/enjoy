@@ -1,7 +1,6 @@
-button '1'
-	explain 'lol'
 button '2'
-	cmd 'firefox'
+	explain 'Go to exaile controls'
+	load 'exaile.lua'
 
 button '3'
 	explain 'Control Audacity'

@@ -2,10 +2,6 @@ button '1'
 	explain 'Go to menu'
 	load 'menu.lua'
 
-button '2'
-	explain 'Go to exaile controls'
-	load 'exaile.lua'
-
 button '3'
 	explain 'Open Firefox'
 	cmd 'firefox www.lua.org'
@@ -19,7 +15,7 @@ button '0'
 	toggle { on = 'ls' , off = 'ls -al' }
 
 button '8'
-	explain 'Compile it ;)'
+	explain 'Compile it (I used it while developing) ;)'
 	notify { message = 'Compiled it!' }
 	cmd 'make'
 
