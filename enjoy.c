@@ -57,12 +57,15 @@ void loadLuaFile(lua_State* L, const char* filename)
 
 }
 
-int main() {
+int main(int argc, char** argv) {
+
+	// TODO print usage and parameters
+
 	unsigned int len = 0;
 	struct js_event msg;
 
-	// TODO have a config file for joysticks
-	int fd = openDevice("/dev/input/js0");
+	// TODO have a config file for joystick devices
+	int fd = openDevice( argc == 2 ? strdup(argv[1]) : "/dev/input/js0" );
 	lua_State *L = openLua();
 
 	// TODO have core.lua as a precompiled binary
