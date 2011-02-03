@@ -2,42 +2,78 @@
 #include <stdlib.h>
 #include <string.h>
 
-// this should be modularized for other OS
-#include <fcntl.h>
-#include <linux/joystick.h>
+#include <SDL/SDL.h>
 
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
 
-#if 0
-#include "key_event.h"
-
-int lua_send_key_event( lua_State* L )
-{
-	if ( lua_isstring(L,1) && lua_isboolean(L,2) ) {
-		send_key_event(lua_tostring(L,1) , lua_toboolean(L,2) );
-	} else {
-		luaL_error(L,"Dammit! Gimme a keycode...");
-	}
-
-	return 0;
+void init() {
+	SDL_Init(SDL_INIT_JOYSTICK|SDL_INIT_VIDEO);
+	SDL_JoystickEventState(SDL_ENABLE);
 }
 
-#endif
-
-void dump_event(struct js_event e) {
-
+void dumpEvent(SDL_Event e, unsigned int time) {
 	printf("----\n");
-	printf("time: %d\n", e.time);
-	printf("value: %s\n", e.value == 1 ? "DOWN" : "UP" );
-	printf("type: %d\n", e.type);
-	printf("number: %d\n", e.number);
-
+	printf("time: %u\n", time);
+	printf("value: %s\n", e.type == SDL_JOYBUTTONDOWN ? "DOWN" : "UP" );
+	printf("number: %d\n", e.jbutton.button);
 }
 
-int openDevice(const char* device) {
-	return open(device, O_RDONLY );
+void handleEvents(lua_State* L)
+{
+
+	while(1) {
+		SDL_Event event;
+		while(SDL_WaitEvent(&event)) {
+
+			switch(event.type) {
+
+				case SDL_JOYBUTTONDOWN:
+				case SDL_JOYBUTTONUP:
+
+				dumpEvent(event,time(0));
+
+				lua_getglobal(L,"__event_button");
+				lua_pushnumber(L, (double) event.jbutton.button );
+				lua_pushboolean(L, (int) event.type == SDL_JOYBUTTONDOWN );
+
+				if(lua_pcall(L, 2, 0, 0) != 0) {
+					luaL_error(L,"%s\n",lua_tostring(L, -1));
+				}
+
+				break;
+
+				case SDL_JOYAXISMOTION:
+					printf("axes\n");
+					break;
+
+			}
+
+		}
+	}
+}
+
+void openJoystick(int index) {
+
+	SDL_Joystick *joy;
+
+	if( SDL_NumJoysticks() > 0){
+
+		joy = SDL_JoystickOpen(index);
+
+		if(joy) {
+			printf("Using: %s\n", SDL_JoystickName(index));
+			printf("Number of Axes: %d\n", SDL_JoystickNumAxes(joy));
+			printf("Number of Buttons: %d\n", SDL_JoystickNumButtons(joy));
+			printf("Number of Balls: %d\n", SDL_JoystickNumBalls(joy));
+		}
+		else {
+			printf("Shiet\n");
+			exit(1);
+		}
+
+	}
 }
 
 lua_State* openLua() {
@@ -57,15 +93,49 @@ void loadLuaFile(lua_State* L, const char* filename)
 
 }
 
+// returns the joy index or -1 in case of error
+int selectJoy(const char* index_string) {
+	int index,ret;
+
+	return sscanf(index_string,"%d",&index) ? index : -1;
+}
+
+void printJoyInfo()
+{
+	int njoys = SDL_NumJoysticks();
+	if ( njoys == 0) {
+		printf("No joystick detected.\n");
+	} else {
+		int i;
+		for (i=0; i< njoys; i++) {
+			printf("%d %s\n", i, SDL_JoystickName(i));
+		}
+
+	}
+}
+
+
 int main(int argc, char** argv) {
 
 	// TODO print usage and parameters
 
-	unsigned int len = 0;
-	struct js_event msg;
+	init();
 
-	// TODO have a config file for joystick devices
-	int fd = openDevice( argc == 2 ? strdup(argv[1]) : "/dev/input/js0" );
+	if (argc < 2) {
+		printJoyInfo();
+		exit(0);
+	}
+
+	int selected = selectJoy(argv[1]);
+
+	if (selected < 0) {
+		//shiet
+		printf("shiet\n");
+		exit(1);
+	}
+
+	printf("%d\n",selected);
+	openJoystick(selected);
 	lua_State *L = openLua();
 
 	// TODO have core.lua as a precompiled binary
@@ -73,26 +143,7 @@ int main(int argc, char** argv) {
 
 	// lua_register(L, "__send_key_event" , lua_send_key_event );
 
-	while(1) {
-		len = read(fd, &msg, sizeof(msg));
-
-		if (len == sizeof(msg)) { //read was succesfull
-
-			if (msg.type == JS_EVENT_BUTTON) { // seems to be a key press
-				dump_event(msg);
-
-				lua_getglobal(L,"__event_button");
-				lua_pushnumber(L, (double) msg.number );
-				lua_pushboolean(L, (int) msg.value );
-
-				if(lua_pcall(L, 2, 0, 0) != 0) {
-					return luaL_error(L,"%s\n",lua_tostring(L, -1));
-				}
-
-			}
-
-		}
-	}
+	handleEvents(L);
 
 	return 0;
 

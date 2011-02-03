@@ -1,5 +1,5 @@
 all:
-	$(CC) -o enjoy enjoy.c -llua -lm  -ldl
+	$(CC) -o enjoy enjoy.c -llua -lm -lSDL -ldl -g
 
 check:
 	@echo "Lot's of these global assigns are 'by design'..."
