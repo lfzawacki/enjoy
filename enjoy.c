@@ -54,7 +54,7 @@ void handleEvents(lua_State* L)
 	}
 }
 
-void openJoystick(int index) {
+int openJoystick(int index) {
 
 	SDL_Joystick *joy;
 
@@ -69,7 +69,7 @@ void openJoystick(int index) {
 			printf("Number of Balls: %d\n", SDL_JoystickNumBalls(joy));
 		}
 		else {
-			printf("Shiet\n");
+			printf("Problem opening joystick %d\n",index);
 			exit(1);
 		}
 
@@ -129,12 +129,9 @@ int main(int argc, char** argv) {
 	int selected = selectJoy(argv[1]);
 
 	if (selected < 0) {
-		//shiet
-		printf("shiet\n");
 		exit(1);
 	}
 
-	printf("%d\n",selected);
 	openJoystick(selected);
 	lua_State *L = openLua();
 
